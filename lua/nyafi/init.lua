@@ -102,12 +102,12 @@ end
 function M.get_filename(this, fn)
 	if not fn then
 		if type(this.config.filename) == "function" then
-			fn = this.config.filename(this)
+			return this.config.filename(this)
 		elseif type(this.config.filename) == "string" then
-			fn = this.config.filename
+			return this.config.filename
 		end
 	end
-	return fn
+	return ""
 end
 
 function M.open(fn)
@@ -143,7 +143,8 @@ function M.open(fn)
 	M:mount()
 	M:callbacks(M.config.events.post_open)
 	popup:on({ event.BufLeave, event.BufUnload }, once(function() M:exit() end))
-	if fn then M:read_file_to_buf(fn) end
+	if type(fn) ~= "string" or type(fn) ~= "function" then error("fn not type of string or function, fn is of type: " .. type(fn)) end
+	if fn then M.read_file_to_buf(fn) end
 end
 
 function M.save(this, fn)
@@ -168,7 +169,7 @@ function M.exit(this)
 	this.popup = nil
 end
 
-function M.read_file_to_buf(this, fn)
+function M.read_file_to_buf(fn)
 	vim.api.nvim_command("$read " .. fn)
 	-- there is a phantom line. These commands remove it.
 	vim.cmd("normal! k") 
