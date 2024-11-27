@@ -74,7 +74,7 @@ end
 function M.write_binds(this, bufnr)
 	bufnr = bufnr or 0
 
-	all(false, function() this:open() end, this.config.maps.open, bufnr)
+	all(false, function() this.open() end, this.config.maps.open, bufnr)
 	all(true, function() this:save() end, this.config.maps.save, bufnr)
 	all(true, function() this:exit() end, this.config.maps.exit, bufnr)
 end
@@ -100,18 +100,17 @@ function once(func)
 end
 
 function M.get_filename(this, fn)
-	if not fn then
 		if type(this.config.filename) == "function" then
 			return this.config.filename(this)
 		elseif type(this.config.filename) == "string" then
 			return this.config.filename
 		end
-	end
-	return ""
 end
 
 function M.open(fn)
 	if M.popup then return end
+	fn = fn or M:get_filename(fn)
+
 	M.config = M.config or {}
 	M.config.maps = M.config.maps or {}
 	M.config.events = M.config.events or {
@@ -120,10 +119,6 @@ function M.open(fn)
 		pre_exit = nil, -- callback(s) ran before exiting
 		post_exit = nil, -- callback(s) ran after exiting
 	}
-
-	fn = M:get_filename(fn)
-	if not fn then fn = M.config.filename end
-	fn = vim.fn.expand(fn)
 
 	M.exited = false
 	local popup = Popup({
@@ -140,7 +135,6 @@ function M.open(fn)
 	})
 
 	M.popup = popup
-	M.fn = fn
 	
 	if type(fn) ~= "string" then 
 		if type(fn) ~= "function" then
@@ -157,9 +151,7 @@ function M.open(fn)
 end
 
 function M.save(this, fn)
-	if not fn then return end
 	if not fn then error("no valid filepath given") end
-	fn = vim.fn.expand(fn)
 	if not this.popup then return end
 	this.write_buf_to_file(this.popup.bufnr, fn)
 end
@@ -173,12 +165,10 @@ function M.exit(this, fn)
 	this:unmount()
 	this:callbacks(this.config.events.post_exit)
 
-	this.fn = ""
 	this.popup = nil
 end
 
 function M.read_file_to_buf(fn)
-	print(fn)
 	vim.api.nvim_command("$read " .. fn)
 	-- there is a phantom line. These commands remove it.
 	vim.cmd("normal! k") 
@@ -186,7 +176,7 @@ function M.read_file_to_buf(fn)
 end
 
 function M.write_buf_to_file(buf, fn)
-	if not vim.api.nvim_buf_is_valid(buf) then return end
+	if not vim.api.nvim_buf_is_valid(buf) then error("call to write_buf_to_file with invalid buffer") end
 	local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
 	local file = io.open(fn, "w")
 	for _, line in ipairs(lines) do
