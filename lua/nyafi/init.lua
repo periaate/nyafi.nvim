@@ -138,21 +138,22 @@ function M.open(fn)
 
 	M.popup = popup
 	M.fn = fn
-
-	M:callbacks(M.config.events.pre_open)
-	M:mount()
-	M:callbacks(M.config.events.post_open)
-	popup:on({ event.BufLeave, event.BufUnload }, once(function() M:exit() end))
+	
 	if type(fn) ~= "string" then 
 		if type(fn) ~= "function" then
 			error("fn not type of string or function, fn is of type: " .. type(fn))
 		end
 	end
+
+	M:callbacks(M.config.events.pre_open)
+	M:mount()
+	M:callbacks(M.config.events.post_open)
+
+	popup:on({ event.BufLeave, event.BufUnload }, once(function() M:exit(fn) end))
 	if fn then M.read_file_to_buf(fn) end
 end
 
 function M.save(this, fn)
-	fn = this:get_filename()
 	if not fn then return end
 	if not fn then error("no valid filepath given") end
 	fn = vim.fn.expand(fn)
@@ -160,12 +161,12 @@ function M.save(this, fn)
 	this.write_buf_to_file(this.popup.bufnr, fn)
 end
 
-function M.exit(this)
+function M.exit(this, fn)
 	if table_T(this.popup, "mounted") then return end
 	if this.exited then return end
 	this.exited = true
 	this:callbacks(this.config.events.pre_exit)
-	this:save()
+	this:save(fn)
 	this:unmount()
 	this:callbacks(this.config.events.post_exit)
 
