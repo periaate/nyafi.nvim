@@ -143,7 +143,11 @@ function M.open(fn)
 	M:mount()
 	M:callbacks(M.config.events.post_open)
 	popup:on({ event.BufLeave, event.BufUnload }, once(function() M:exit() end))
-	if type(fn) ~= "string" or type(fn) ~= "function" then error("fn not type of string or function, fn is of type: " .. type(fn)) end
+	if type(fn) ~= "string" then 
+		if type(fn) ~= "function" then
+			error("fn not type of string or function, fn is of type: " .. type(fn))
+		end
+	end
 	if fn then M.read_file_to_buf(fn) end
 end
 
