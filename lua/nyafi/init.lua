@@ -33,14 +33,14 @@ end
 local function clear() vim.api.nvim_buf_set_lines(op.buf, 0, -1, false, {}) end
 
 function M.callbacks(this, cbs)
+	if not cbs then return end
 	function call(cb)
 		if type(cb) == "function" then cb(this) end
 	end
 
 	if type(cbs) == "table" then
 		for _, v in ipairs(cbs) do call(v) end
-	else
-		print("calling cb")
+	elseif type(cbs) == "function" then
 		call(cbs)
 	end
 end
@@ -112,6 +112,15 @@ end
 
 function M.open(fn)
 	if M.popup then return end
+	M.config = M.config or {}
+	M.config.maps = M.config.maps or {}
+	M.config.events = M.config.events or {
+		pre_open = nil, -- callback(s) ran before opening
+		post_open = nil, -- callback(s) ran after opening
+		pre_exit = nil, -- callback(s) ran before exiting
+		post_exit = nil, -- callback(s) ran after exiting
+	}
+
 	fn = M:get_filename(fn)
 	M.exited = false
 	local popup = Popup({
