@@ -122,6 +122,9 @@ function M.open(fn)
 	}
 
 	fn = M:get_filename(fn)
+	if not fn then fn = M.config.filename end
+	fn = vim.fn.expand(fn)
+
 	M.exited = false
 	local popup = Popup({
 		enter = true,
@@ -175,6 +178,7 @@ function M.exit(this, fn)
 end
 
 function M.read_file_to_buf(fn)
+	print(fn)
 	vim.api.nvim_command("$read " .. fn)
 	-- there is a phantom line. These commands remove it.
 	vim.cmd("normal! k") 
