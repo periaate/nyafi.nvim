@@ -151,6 +151,7 @@ function M.open(fn)
 end
 
 function M.save(this, fn)
+	fn = fn or this:get_filename(fn)
 	if not fn then error("no valid filepath given") end
 	if not this.popup then return end
 	this.write_buf_to_file(this.popup.bufnr, fn)
