@@ -12,12 +12,12 @@ M.config = {
 		exit = {}, -- keymap(s) to exit file
 	},
 	events = {
-		pre_open = nil, -- callback ran on opening
-		post_open = nil, -- callback ran on opening
-		pre_exit = nil, -- callback ran on exiting
-		post_exit = nil, -- callback ran on exiting
+		pre_open = nil, -- callback(s) ran before opening
+		post_open = nil, -- callback(s) ran after opening
+		pre_exit = nil, -- callback(s) ran before exiting
+		post_exit = nil, -- callback(s) ran after exiting
 	},
-	filename = nil, -- string|function
+	filename = nil, -- string|function; function is given the object as an argument.
 }
 
 function table_T(tbl, fieldName)
@@ -102,7 +102,7 @@ end
 function M.get_filename(this, fn)
 	if not fn then
 		if type(this.config.filename) == "function" then
-			fn = this.config.filename()
+			fn = this.config.filename(this)
 		elseif type(this.config.filename) == "string" then
 			fn = this.config.filename
 		end
