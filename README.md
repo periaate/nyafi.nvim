@@ -1,4 +1,8 @@
 # nyafi
+
+> [!WARNING]
+> Repository has been moved to [garage.nvim/nyafi](https://github.com/periaate/garage.nvim).
+
 a cute floating file editing thing!
 
 ### installation
